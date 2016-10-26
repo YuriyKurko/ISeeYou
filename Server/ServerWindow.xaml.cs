@@ -12,14 +12,14 @@ using System.Drawing.Imaging;
 using System.Net;
 using System.Windows.Interop;
 
-namespace ISeeYouServer
+namespace Server
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ServerWindow : Window
     {
-        public MainWindow()
+        public ServerWindow()
         {
             InitializeComponent();
         }
@@ -38,6 +38,18 @@ namespace ISeeYouServer
                 server.Start();
                 client = server.AcceptTcpClient();
             }
+            //server.Start();
+            //while (true) // Add your exit flag here
+            //{
+            //    client = server.AcceptTcpClient();
+            //    ThreadPool.QueueUserWorkItem(ThreadProc, client);
+            //}
+        }
+
+        private static void ThreadProc(object obj)
+        {
+            var client = (TcpClient)obj;
+            // Do your work here
         }
 
         private void StopListening()
