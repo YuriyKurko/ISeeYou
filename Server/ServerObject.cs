@@ -31,13 +31,11 @@ namespace Server
         }
         protected internal void RemoveConnection(string id)
         {
-            // получаем по id закрытое подключение
             ClientObject client = clients.FirstOrDefault(c => c.Id == id);
-            // и удаляем его из списка подключений
+
             if (client != null)
                 clients.Remove(client);
         }
-        // прослушивание входящих подключений
         protected internal void Listen()
         {
             try
@@ -58,7 +56,7 @@ namespace Server
                     {
                         Action action = delegate
                         {
-                            clientsListView.Items.Add(c.tcpClient.Client.RemoteEndPoint);
+                            clientsListView.Items.Add(c);
                             clientsListView.Items.Refresh();
                         };
                         clientsListView.Dispatcher.Invoke(action);
@@ -72,22 +70,37 @@ namespace Server
             }
         }
 
-        public void SendCommand(string command, int id)
+        public void SendCommand(string command, string id)
         {
             byte[] data = Encoding.Unicode.GetBytes(command);
-            clients[id].Stream.Write(data, 0, data.Length); //передача данных
+            foreach(var c in clients)
+            {
+                if (c.Id == id)
+                {
+                    c.Stream.Write(data, 0, data.Length);
+                }
+            }
+            //clients[id].Stream.Write(data, 0, data.Length); 
         }
 
-        // отключение всех клиентов
         protected internal void Disconnect()
         {
-            tcpListener.Stop(); //остановка сервера
-
-            for (int i = 0; i < clients.Count; i++)
+            if (tcpListener != null)
             {
-                clients[i].Close(); //отключение клиента
+                tcpListener.Stop(); 
+
+                for (int i = 0; i < clients.Count; i++)
+                {
+                    clients[i].Close();
+                }
             }
-            Environment.Exit(0); //завершение процесса
+
+            Action action = delegate
+            {
+                //clientsListView.Items.Clear();
+                clientsListView.Items.Refresh();
+            };
+            clientsListView.Dispatcher.Invoke(action);
         }
     }
 }

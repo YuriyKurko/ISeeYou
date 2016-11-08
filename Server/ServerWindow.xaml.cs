@@ -28,7 +28,11 @@ namespace Server
         static ServerObject server; 
         static Thread listenThread; 
         private Thread GetImage;
-        private Thread Sendessage;
+
+        ClientObject GetSelectedClient()
+        {
+            return (ClientObject)clientsListView.SelectedValue;            
+        }
 
         private void listenButton_Click(object sender, RoutedEventArgs e)
         {
@@ -38,10 +42,12 @@ namespace Server
             {
                 server = new ServerObject(port, clientsListView);
                 listenThread = new Thread(new ThreadStart(server.Listen));
-                listenThread.Start(); 
+                listenThread.Start();
+                refreshButton.IsEnabled = true; 
             }
             catch (Exception ex)
             {
+                refreshButton.IsEnabled = false;
                 server.Disconnect();
                 Console.WriteLine(ex.Message);
             }
@@ -49,23 +55,26 @@ namespace Server
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            server.Disconnect();
+            if (server != null)
+            {
+                server.Disconnect();
+            }
         }
 
         private void shareScreenButton_Click(object sender, RoutedEventArgs e)
         {
-            ReceiveScreenImage receivedImage = new ReceiveScreenImage(server.clients[0], screenImage);
+            ReceiveScreenImage receivedImage = new ReceiveScreenImage(GetSelectedClient(), screenImage);
 
             if(shareScreenButton.Content.ToString() == "Start sharing")
             {
-                server.SendCommand("START_SHARE_SCREEN", 0);
+                server.SendCommand("START_SHARE_SCREEN", GetSelectedClient().Id);
                 GetImage = new Thread(new ThreadStart(receivedImage.ReceiveImage));
                 GetImage.Start();
                 shareScreenButton.Content = "Stop sharing";
             }
             else
             {
-                server.SendCommand("STOP_SHARE_SCREEN", 0);
+                server.SendCommand("STOP_SHARE_SCREEN", GetSelectedClient().Id);
                 shareScreenButton.Content = "Start sharing";
                 GetImage.Abort();
             }
@@ -75,13 +84,30 @@ namespace Server
         {
             if(messageTextBox.Text.ToString() != "")
             {
-                server.SendCommand("MESSAGEBOX|" + messageTextBox.Text, 0);
+                server.SendCommand("MESSAGEBOX|" + messageTextBox.Text, GetSelectedClient().Id);
             }
             else
             {
                 MessageBox.Show("Enter message", "Empty message",MessageBoxButton.OK ,MessageBoxImage.Asterisk);
             }
 
+        }
+
+        private void refreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            int port = int.Parse(portTextBox.Text);
+            server.Disconnect();
+            try
+            {
+                server = new ServerObject(port, clientsListView);
+                listenThread = new Thread(new ThreadStart(server.Listen));
+                listenThread.Start();
+            }
+            catch (Exception ex)
+            {
+                server.Disconnect();
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

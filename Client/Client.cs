@@ -13,9 +13,10 @@ namespace Client
 {
     class Client
     {
-        public Client(string MachineName, string County, TcpClient Client)
+        public Client(string MachineName, string UserName, string County, TcpClient Client)
         {
             machineName = MachineName;
+            userName = UserName;
             country = County;
             tcpClient = Client;
 
@@ -23,13 +24,14 @@ namespace Client
 
         public bool isConnected = false;
 
-        private readonly TcpClient tcpClient = new TcpClient();
-        public static NetworkStream networkStream;
+        private TcpClient tcpClient;
+        public NetworkStream networkStream;
 
         private ShareScreen shareScreen;
         private Thread shareScreenThread;
 
         private string machineName { get; set; }
+        private string userName { get; set; }
         private string country { get; set; }
 
         public void Connect(string host, int port)
@@ -41,6 +43,7 @@ namespace Client
                     tcpClient.Connect(host, port);
                     Console.WriteLine($"User {machineName} connected to {tcpClient.Client.RemoteEndPoint}.");
                     isConnected = tcpClient.Connected;
+                    SendClientInfo();
                 }
                 catch (Exception ex)
                 {
@@ -49,31 +52,22 @@ namespace Client
             }
         }
 
-        private void GetMessage()
+        public void Process()
         {
-            byte[] data = new byte[64]; // буфер для получаемых данных
-            StringBuilder builder = new StringBuilder();
-            int bytes = 0;
-            do
-            {
-                bytes = networkStream.Read(data, 0, data.Length);
-                builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-            }
-            while (networkStream.DataAvailable);
-
-            MessageBox.Show(builder.ToString(), "Windows message", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-        }
-
-        public void GetCommand()
-        {
-            while (true)
+            while (tcpClient.Connected)
             {
                 try
                 {
-                    byte[] data = new byte[256];
-                    StringBuilder builder = new StringBuilder();
                     int bytes = 0;
+                    string message = "";
+                    string command = "";
+                    string[] receivedMessage;
+                    byte[] data = new byte[256];
+
+                    StringBuilder builder = new StringBuilder();
+
                     networkStream = tcpClient.GetStream();
+
                     do
                     {
                         bytes = networkStream.Read(data, 0, data.Length);
@@ -81,52 +75,64 @@ namespace Client
                     }
                     while (networkStream.DataAvailable);
 
-                    string message = "";
-
-                    string[] receivedMessage = builder.ToString().Split('|');
-
-                    string command = receivedMessage[0];
+                    receivedMessage = builder.ToString().Split('|');
+                    command = receivedMessage[0];
 
                     if (receivedMessage.Count() == 2)
                     {
                         message = receivedMessage[1];
                     }
 
-                    Console.WriteLine(command);
+                    switch (command)
+                    {
+                        case "START_SHARE_SCREEN":
+                            shareScreen = new ShareScreen(tcpClient.GetStream());
+                            shareScreenThread = new Thread(new ThreadStart(shareScreen.SendScreenshot));
+                            shareScreenThread.Start();
+                            break;
+                        case "STOP_SHARE_SCREEN":
+                            shareScreenThread.Abort();
+                            shareScreenThread = null;
+                            shareScreen = null;
+                            break;
+                        case "MESSAGEBOX":
+                            MessageBox.Show(message, "Windows message", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                            break;
+                    }
 
-                    if(command == "START_SHARE_SCREEN")
+
+                    if (command != "")
                     {
-                        shareScreen = new ShareScreen(tcpClient.GetStream());
-                        shareScreenThread = new Thread(new ThreadStart(shareScreen.SendScreenshot));
-                        shareScreenThread.Start();  
+                        Console.WriteLine(command);
                     }
-                    else if(command == "STOP_SHARE_SCREEN")
+                    else
                     {
-                        shareScreenThread.Abort();
-                        shareScreenThread = null;
-                        shareScreen = null;
+                        throw new Exception();
                     }
-                    else if(command == "MESSAGEBOX")
-                    {
-                        MessageBox.Show(message, "Windows message", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-                    }
+
                 }
-                catch
+                catch(Exception ex)
                 {
-                    Console.WriteLine("Connection interrupted!"); 
-                    Console.ReadLine();
+                    Console.WriteLine("Connection interrupted! " + ex.Message);
                     Disconnect();
                 }
             }
         }
 
+        public void SendClientInfo()
+        {
+            string message = $"{machineName}|{userName}|{country}";
+            byte[] data = Encoding.Unicode.GetBytes(message);
+            networkStream = tcpClient.GetStream();
+            networkStream.Write(data, 0, data.Length);
+        }
+
         public void Disconnect()
         {
             if (networkStream != null)
-                networkStream.Close();//отключение потока
+                networkStream.Close();
             if (tcpClient != null)
-                tcpClient.Close();//отключение клиента
-            Environment.Exit(0); //завершение процесса
+                tcpClient.Close();
         }
 
         

@@ -18,12 +18,30 @@
             <TabItem Header="Main" TabIndex="0">
                 <Grid Background="#FFE5E5E5">
                     <TextBox x:Name="portTextBox" HorizontalAlignment="Left" Height="25" Margin="49,13,0,0" Text="1488" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="14"/>
-                    <Button x:Name="listenButton" Content="Listen" HorizontalAlignment="Left" Margin="174,12,0,0" VerticalAlignment="Top" Width="120" Click="listenButton_Click" Height="25" FontSize="14" Grid.ColumnSpan="2"/>
+                    <Button x:Name="listenButton"  Content="Listen" HorizontalAlignment="Left" Margin="174,12,0,0" VerticalAlignment="Top" Width="120" Click="listenButton_Click" Height="25" FontSize="14" Grid.ColumnSpan="2"/>
+                    <Button x:Name="refreshButton" Content="Refresh" IsEnabled="False" HorizontalAlignment="Left" Margin="304,12,0,0" VerticalAlignment="Top" Width="120"  Height="25" FontSize="14" Grid.ColumnSpan="2" Click="refreshButton_Click"/>
                     <Label x:Name="portLabel" Content="Port:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="14"/>
-                    <ListView x:Name="clientsListView" Margin="0,50,0,0" Background="Snow" BorderThickness="0"/>
+                    <ListView x:Name="clientsListView" Margin="0,50,0,0" Background="Snow" BorderThickness="0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <RadioButton GroupName="RadioButtons" IsChecked="{Binding IsPresent2}" x:Name="clientRadioButton"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Id"  Width="50" DisplayMemberBinding="{Binding Id}" />
+                                <GridViewColumn Header="IP"  Width="150" DisplayMemberBinding="{Binding IP}" />
+                                <GridViewColumn Header="Machine name" Width="100" DisplayMemberBinding="{Binding MachineName}" />
+                                <GridViewColumn Header="User name" Width="150" DisplayMemberBinding="{Binding UserName}" />
+                                <GridViewColumn Header="Country" Width="150" DisplayMemberBinding="{Binding Country}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </Grid>
             </TabItem>
-            <TabItem Header="Screen">
+            <TabItem Header="Features">
                 <Grid Background="#FFE5E5E5">
                     <Button x:Name="shareScreenButton" Content="Start sharing" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top" Width="120" Height="25" FontSize="14" Click="shareScreenButton_Click" />
                     <Button x:Name="sendMessageButton" Content="Send message" HorizontalAlignment="Left" Margin="140,12,0,0" VerticalAlignment="Top" Width="120" Height="25" FontSize="14" Click="sendMessageButton_Click" />
