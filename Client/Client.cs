@@ -23,12 +23,16 @@ namespace Client
         }
 
         public bool isConnected = false;
+        bool isScreenStarted = false;
+        bool isWebcamStarted = false;
 
         private TcpClient tcpClient;
         public NetworkStream networkStream;
 
         private ShareScreen shareScreen;
+        private ShareWebcam shareWebcam;
         private Thread shareScreenThread;
+        private Thread shareWebcamThread;
 
         private string machineName { get; set; }
         private string userName { get; set; }
@@ -82,24 +86,68 @@ namespace Client
                     {
                         message = receivedMessage[1];
                     }
-
                     switch (command)
                     {
                         case "START_SHARE_SCREEN":
-                            shareScreen = new ShareScreen(tcpClient.GetStream());
-                            shareScreenThread = new Thread(new ThreadStart(shareScreen.SendScreenshot));
-                            shareScreenThread.Start();
+                            if (!isWebcamStarted)
+                            {
+                                shareScreen = new ShareScreen(tcpClient.GetStream());
+                                shareScreenThread = new Thread(new ThreadStart(shareScreen.SendScreenshot));
+                                shareScreenThread.Start();
+                                isScreenStarted = true;
+                            }
+                            else
+                            {
+                                shareWebcam.StopCapturing();
+                                shareWebcamThread.Abort();
+                                shareWebcamThread = null;
+                                shareWebcam = null;
+                                isWebcamStarted = false;
+
+                                shareWebcam = new ShareWebcam(tcpClient.GetStream(), true);
+                                shareWebcamThread = new Thread(new ThreadStart(shareWebcam.CapturePhoto));
+                                shareWebcamThread.Start();
+                                isWebcamStarted = true;
+                            }
                             break;
                         case "STOP_SHARE_SCREEN":
                             shareScreenThread.Abort();
                             shareScreenThread = null;
                             shareScreen = null;
+                            isScreenStarted = false;
+                            break;
+                        case "START_WEBCAM":
+                            //if (!isScreenStarted)
+                            //{
+                            //    shareWebcam = new ShareWebcam(tcpClient.GetStream(), false);
+                            //    shareWebcamThread = new Thread(new ThreadStart(shareWebcam.CapturePhoto));
+                            //    shareWebcamThread.Start();
+                            //    isWebcamStarted = true;
+                            //}
+                            //else
+                            //{
+                                shareScreenThread.Abort();
+                                shareScreenThread = null;
+                                shareScreen = null;
+                                isScreenStarted = false;
+
+                                shareWebcam = new ShareWebcam(tcpClient.GetStream(), true);
+                                shareWebcamThread = new Thread(new ThreadStart(shareWebcam.CapturePhoto));
+                                shareWebcamThread.Start();
+                                isWebcamStarted = true;
+                            //}
+                            break;
+                        case "STOP_WEBCAM":
+                            shareWebcam.StopCapturing();
+                            shareWebcamThread.Abort();
+                            shareWebcamThread = null;
+                            shareWebcam = null;
+                            isWebcamStarted = false;
                             break;
                         case "MESSAGEBOX":
                             MessageBox.Show(message, "Windows message", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                             break;
                     }
-
 
                     if (command != "")
                     {

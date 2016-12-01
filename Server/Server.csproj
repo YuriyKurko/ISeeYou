@@ -57,6 +57,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ReceiveImage.cs" />
+    <Compile Include="SendMessageWindow.xaml.cs">
+      <DependentUpon>SendMessageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ReceiveImageWindow.xaml.cs">
+      <DependentUpon>ReceiveImageWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="SendMessageWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ServerWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -66,12 +77,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ClientObject.cs" />
-    <Compile Include="ReceiveScreenImage.cs" />
     <Compile Include="ServerObject.cs" />
     <Compile Include="ServerWindow.xaml.cs">
       <DependentUpon>ServerWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ReceiveImageWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -99,6 +113,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\webcam.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\screen_share.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\message.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

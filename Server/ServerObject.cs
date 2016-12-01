@@ -12,15 +12,15 @@ namespace Server
 {
     public class ServerObject
     {
-        public ServerObject(int port, ListView clientsListView)
+        public ServerObject(int port, DataGrid clientsDataGrid)
         {
             this.port = port;
-            this.clientsListView = clientsListView;
+            this.clientsDataGrid = clientsDataGrid;
         }
 
         static TcpListener tcpListener; // сервер для прослушивания
         public TcpClient tcpClient;
-        ListView clientsListView;
+        DataGrid clientsDataGrid;
         public List<ClientObject> clients = new List<ClientObject>(); // все подключения
 
         public int port { get; set; }
@@ -50,16 +50,16 @@ namespace Server
 
                     ClientObject clientObject = new ClientObject(tcpClient, this);
 
-                    clientsListView.Dispatcher.Invoke(() => this.clientsListView.Items.Clear());//new Action(() => this.clientsListView.Items.Clear()));
+                    clientsDataGrid.Dispatcher.Invoke(() => this.clientsDataGrid.Items.Clear());//new Action(() => this.clientsListView.Items.Clear()));
 
                     foreach (var c in clients)
                     {
                         Action action = delegate
                         {
-                            clientsListView.Items.Add(c);
-                            clientsListView.Items.Refresh();
+                            clientsDataGrid.Items.Add(c);
+                            clientsDataGrid.Items.Refresh();
                         };
-                        clientsListView.Dispatcher.Invoke(action);
+                        clientsDataGrid.Dispatcher.Invoke(action);
                     }
                 }
             }
@@ -80,7 +80,6 @@ namespace Server
                     c.Stream.Write(data, 0, data.Length);
                 }
             }
-            //clients[id].Stream.Write(data, 0, data.Length); 
         }
 
         protected internal void Disconnect()
@@ -97,10 +96,9 @@ namespace Server
 
             Action action = delegate
             {
-                //clientsListView.Items.Clear();
-                clientsListView.Items.Refresh();
+                clientsDataGrid.Items.Clear();
             };
-            clientsListView.Dispatcher.Invoke(action);
+            clientsDataGrid.Dispatcher.Invoke(action);
         }
     }
 }

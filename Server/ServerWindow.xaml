@@ -12,42 +12,70 @@
         MinWidth="600"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing">
-
     <Grid>
-        <TabControl x:Name="tabControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0">
+        <TabControl x:Name="tabControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" FontSize="14" FontFamily="Segoe UI Semilight">
             <TabItem Header="Main" TabIndex="0">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox x:Name="portTextBox" HorizontalAlignment="Left" Height="25" Margin="49,13,0,0" Text="1488" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="14"/>
-                    <Button x:Name="listenButton"  Content="Listen" HorizontalAlignment="Left" Margin="174,12,0,0" VerticalAlignment="Top" Width="120" Click="listenButton_Click" Height="25" FontSize="14" Grid.ColumnSpan="2"/>
-                    <Button x:Name="refreshButton" Content="Refresh" IsEnabled="False" HorizontalAlignment="Left" Margin="304,12,0,0" VerticalAlignment="Top" Width="120"  Height="25" FontSize="14" Grid.ColumnSpan="2" Click="refreshButton_Click"/>
-                    <Label x:Name="portLabel" Content="Port:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="14"/>
-                    <ListView x:Name="clientsListView" Margin="0,50,0,0" Background="Snow" BorderThickness="0">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn>
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <RadioButton GroupName="RadioButtons" IsChecked="{Binding IsPresent2}" x:Name="clientRadioButton"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="Id"  Width="50" DisplayMemberBinding="{Binding Id}" />
-                                <GridViewColumn Header="IP"  Width="150" DisplayMemberBinding="{Binding IP}" />
-                                <GridViewColumn Header="Machine name" Width="100" DisplayMemberBinding="{Binding MachineName}" />
-                                <GridViewColumn Header="User name" Width="150" DisplayMemberBinding="{Binding UserName}" />
-                                <GridViewColumn Header="Country" Width="150" DisplayMemberBinding="{Binding Country}" />
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="150"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBox x:Name="portTextBox" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="25" Width="auto" Margin="2,0" Text="1488" TextWrapping="Wrap" FontSize="14"/>
+                    <Button x:Name="listenButton"  Grid.Column="2" Grid.Row="0" Content="Listen" HorizontalAlignment="Center"  VerticalAlignment="Center" Width="120" Click="listenButton_Click" Height="25" FontSize="14"/>
+                    <Button x:Name="refreshButton" Grid.Column="3" Grid.Row="0" Content="Refresh"  IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120"  Height="25" FontSize="14" Grid.ColumnSpan="2" Click="refreshButton_Click"/>
+                    <Label x:Name="portLabel" Grid.Column="0" Grid.Row="0" Content="Port:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="14"/>
+                    <DataGrid x:Name="clientsDataGrid" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="1" AutoGenerateColumns="False" CanUserSortColumns="False" IsReadOnly="True"  Background="Snow" BorderThickness="0">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="15">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <RadioButton x:Name="radioButton" GroupName="Clients"/>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" Value="True">
+                                                <Setter TargetName="radioButton" Property="IsChecked" Value="True"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Guid"  Width = "1*" Binding="{Binding Id}" />
+                            <DataGridTextColumn Header="IP"   Width = "1*" Binding="{Binding IP}" />
+                            <DataGridTextColumn Header="Machine name"  Width = "1*" Binding="{Binding MachineName}" />
+                            <DataGridTextColumn Header="User name"  Width = "1*" Binding="{Binding UserName}" />
+                            <DataGridTextColumn Header="Country"  Width = "1*" Binding="{Binding Country}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
             <TabItem Header="Features">
-                <Grid Background="#FFE5E5E5">
-                    <Button x:Name="shareScreenButton" Content="Start sharing" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top" Width="120" Height="25" FontSize="14" Click="shareScreenButton_Click" />
-                    <Button x:Name="sendMessageButton" Content="Send message" HorizontalAlignment="Left" Margin="140,12,0,0" VerticalAlignment="Top" Width="120" Height="25" FontSize="14" Click="sendMessageButton_Click" />
+                <ScrollViewer CanContentScroll="True">
+                    <WrapPanel>
+                        <Button x:Name="receiveImageButton" ToolTip="Sreen / webcam sharing" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20" Width="200" Height="100" Click="receiveImageButton_Click" Background="{x:Null}" BorderThickness="0">
+                            <Image Source="Resources/screen_share.png"/>
+                        </Button>
+                        <Button x:Name="sendMessageButton"  ToolTip="Send message" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="20" Width="100" Height="100" Click="sendMessageButton_Click" Background="{x:Null}" BorderThickness="0">
+                            <Image Source="Resources/message.png"/>
+                        </Button>
+                    </WrapPanel> 
+                       
+                    
+                </ScrollViewer>
+                                  
+                    <!--
                     <TextBox x:Name="messageTextBox" Height="25" Margin="270,13,10,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top"  FontSize="14" HorizontalAlignment="Stretch" Width="Auto"/>
-                    <Image x:Name="screenImage"  Margin="0,49,0,0"/>
-                </Grid>
+                        <Button x:Name="sendMessageButton" Content="Send message" HorizontalAlignment="Left" Margin="140,12,0,0" VerticalAlignment="Top" Width="120" Height="25" FontSize="14" Click="sendMessageButton_Click" />
+    
+                -->
+                   
+            
             </TabItem>
             <TabItem Header="Create Stub" TabIndex="2">
                 <Grid Background="#FFE5E5E5"/>

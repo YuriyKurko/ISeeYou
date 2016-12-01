@@ -14,7 +14,6 @@ namespace Client
     {
         static TcpClient tcpClient;
         static Client client;
-
         static void Main(string[] args)
         {
             string host = "192.168.0.59";

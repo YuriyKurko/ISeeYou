@@ -16,6 +16,7 @@ namespace Server
         public string UserName { get; private set; }
         public string Country { get; private set; }
 
+        public bool isCheked = true;
 
         protected internal NetworkStream Stream { get; set; }
         public TcpClient tcpClient;

@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using System.Net;
 using System.Windows.Interop;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace Server
 {
@@ -27,11 +28,10 @@ namespace Server
 
         static ServerObject server; 
         static Thread listenThread; 
-        private Thread GetImage;
 
-        ClientObject GetSelectedClient()
+        public ClientObject GetSelectedClient()
         {
-            return (ClientObject)clientsListView.SelectedValue;            
+            return (ClientObject)clientsDataGrid.SelectedValue;            
         }
 
         private void listenButton_Click(object sender, RoutedEventArgs e)
@@ -40,7 +40,7 @@ namespace Server
 
             try
             {
-                server = new ServerObject(port, clientsListView);
+                server = new ServerObject(port, clientsDataGrid);
                 listenThread = new Thread(new ThreadStart(server.Listen));
                 listenThread.Start();
                 refreshButton.IsEnabled = true; 
@@ -61,35 +61,24 @@ namespace Server
             }
         }
 
-        private void shareScreenButton_Click(object sender, RoutedEventArgs e)
+        private void receiveImageButton_Click(object sender, RoutedEventArgs e)
         {
-            ReceiveScreenImage receivedImage = new ReceiveScreenImage(GetSelectedClient(), screenImage);
-
-            if(shareScreenButton.Content.ToString() == "Start sharing")
-            {
-                server.SendCommand("START_SHARE_SCREEN", GetSelectedClient().Id);
-                GetImage = new Thread(new ThreadStart(receivedImage.ReceiveImage));
-                GetImage.Start();
-                shareScreenButton.Content = "Stop sharing";
-            }
-            else
-            {
-                server.SendCommand("STOP_SHARE_SCREEN", GetSelectedClient().Id);
-                shareScreenButton.Content = "Start sharing";
-                GetImage.Abort();
-            }
+            ReceiveImageWindow receiveImageWindow = new ReceiveImageWindow(this, clientsDataGrid, server);
+            receiveImageWindow.Show();
         }
 
         private void sendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            if(messageTextBox.Text.ToString() != "")
-            {
-                server.SendCommand("MESSAGEBOX|" + messageTextBox.Text, GetSelectedClient().Id);
-            }
-            else
-            {
-                MessageBox.Show("Enter message", "Empty message",MessageBoxButton.OK ,MessageBoxImage.Asterisk);
-            }
+            SendMessageWindow sendMessage = new SendMessageWindow();
+            sendMessage.Show();
+            //if(messageTextBox.Text.ToString() != "")
+            //{
+            //    server.SendCommand("MESSAGEBOX|" + messageTextBox.Text, GetSelectedClient().Id);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Enter message", "Empty message",MessageBoxButton.OK ,MessageBoxImage.Asterisk);
+            //}
 
         }
 
@@ -99,7 +88,7 @@ namespace Server
             server.Disconnect();
             try
             {
-                server = new ServerObject(port, clientsListView);
+                server = new ServerObject(port, clientsDataGrid);
                 listenThread = new Thread(new ThreadStart(server.Listen));
                 listenThread.Start();
             }
@@ -109,5 +98,6 @@ namespace Server
                 Console.WriteLine(ex.Message);
             }
         }
+
     }
 }
